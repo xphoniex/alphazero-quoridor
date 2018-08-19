@@ -1,0 +1,7 @@
+*.pyc
+.DS_Store
+
+/temp/
+/quoridor/test/
+/.project
+/.pydevproject
