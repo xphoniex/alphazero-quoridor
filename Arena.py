@@ -1,6 +1,7 @@
 import numpy as np
 from pytorch_classification.utils import Bar, AverageMeter
 import time
+#import os
 
 class Arena():
     """
@@ -43,7 +44,9 @@ class Arena():
                 assert(self.display)
                 print("Turn ", str(it), "Player ", str(curPlayer))
                 #self.display(board)
-                self.display(self.game.getCanonicalForm(board, curPlayer), curPlayer)
+                if players[curPlayer+1].__name__ != '<lambda>': # new
+                    #os.system('clear')
+                    self.display(self.game.getCanonicalForm(board, curPlayer), curPlayer)
 
             action = players[curPlayer+1](self.game.getCanonicalForm(board, curPlayer))
             valids = self.game.getValidMoves(self.game.getCanonicalForm(board, curPlayer),1)
@@ -53,14 +56,21 @@ class Arena():
                 #print(action)
                 #return 0
                 assert valids[action] >0
-            if verbose:
-                print("Action index ", str(action))
+            #if verbose:
+                #print("Action index ", str(action))
             board, curPlayer = self.game.getNextState(board, curPlayer, action)
+            if verbose and players[curPlayer+1].__name__ == '<lambda>': # new
+                #os.system('clear')
+                self.display(self.game.getCanonicalForm(board, -curPlayer), -curPlayer)
 
         if verbose:
             assert(self.display)
             print("Game over: Turn ", str(it), "Result ", str(self.game.getGameEnded(board, 1)))
-            self.display(board)
+            if verbose and players[curPlayer+1].__name__ == '<lambda>':
+                self.display(self.game.getCanonicalForm(board, -curPlayer), -curPlayer)
+            else:
+                self.display(self.game.getCanonicalForm(board, curPlayer), curPlayer)
+            #self.display(board)
 
         return self.game.getGameEnded(board, 1)
 

@@ -132,6 +132,7 @@ def display(board, swap=1):
                 (x_,y_) = (i/2,j+1)
 
     blocks = board[2]+board[3]
+    extraH = []
     print (" _" * n)    # header
     for row in range(n):
         rV = "| "*n + "|"
@@ -140,9 +141,15 @@ def display(board, swap=1):
         for col in range(n*2-1):
             if blocks[blocks_row][col]:
                 rV = placePiece(rV, col+1,'x')
+                if blocks_row < n*2-3 and blocks[blocks_row+2][col]:
+                    extraH.append(col+1)
         if (x==row): rV = placePiece(rV, y, pieces[0])
         if (x_==row): rV = placePiece(rV, y_, pieces[1])
         if row != n-1:
+            while (len(extraH)):
+                next_extraH = extraH.pop()
+                rH = placePiece(rH, next_extraH, 'x')
+                            
             blocks_row = row*2 + 1
             for col in range(n*2-1):
                 if blocks[blocks_row][col] and col+2 < n*2-1 and blocks[blocks_row][col+2]:
