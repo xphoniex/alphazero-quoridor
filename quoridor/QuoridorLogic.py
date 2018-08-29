@@ -1,6 +1,7 @@
 from collections import deque
 import numpy as np
 import time
+import pathFinder
 
 def is_wall_legal(moves):
     if moves == None: return 0
@@ -18,6 +19,7 @@ class Board():
 
         self.pieces[0][self.n-1][self.n/2] = 1
         self.pieces[1][0][self.n/2] = 1
+        pathFinder.setup(n)
 
     def get_legal_moves(self, color, pool=None):
         """Returns all the legal moves for the given color.
@@ -79,14 +81,34 @@ class Board():
                         moves[5] = 1
             else:
                 moves[3] = 1
+        #t0 = time.time()
+        #wall_moves_1 = self.wall_moves(color, pool)
+        #t1 = time.time()
+        wall_moves_2 = self.wall_moves_(color)
+        #t2 = time.time()
 
-        moves += self.wall_moves(color, pool)
+        #print (t2-t1)*1000, " vs. ", (t1-t0)*1000
+        #if wall_moves_1 != wall_moves_2:
+            #print "False"
+            #print self.pieces
+            #print wall_moves_1
+            #print wall_moves_2
+            #print repr(self.pieces.tobytes())
+
+        moves += wall_moves_2
+        #moves += self.wall_moves(color, pool)
         return moves
 
     def player_position(self, color):
         idx = 0 if color==1 else 1
         pos = np.argmax(self.pieces[idx])
         return (pos/self.n, pos%self.n)
+
+    def wall_moves_(self, color):
+        idx = 2 if color==1 else 3
+        if (np.sum(self.pieces[idx])==20):
+            return [0]*(self.n_**2)*2
+        return pathFinder.legalWalls(self.pieces.tobytes())
 
     def wall_moves(self, color, pool):
         idx = 2 if color==1 else 3
