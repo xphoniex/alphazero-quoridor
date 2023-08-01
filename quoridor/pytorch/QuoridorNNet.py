@@ -319,7 +319,7 @@ class QuoridorNNet(nn.Module):
         ## updated
         
         # image_shape: tuple[int, int, int],
-        # channels: int = 128,
+        #dim_mults = (1, 2, 4, 8)
         dim_mults = (1, 2, 4, 8)
         groups = 4        
         time_emb_dim = 4
@@ -327,17 +327,19 @@ class QuoridorNNet(nn.Module):
         self.pos_emb = SinusoidalPositionEmbeddings2D(args.num_channels, 4, self.board_x, self.board_y)
         channels = args.num_channels
         self.initial_conv = nn.Conv2d(4, channels, 7, padding=3)
-        self.attn_block1 = AttnWithLinearBlock(channels)
-        self.attn_block2 = AttnWithLinearBlock(channels)
+        attn_blocks = 4
+        self.attn_blocks = nn.ModuleList([
+            AttnWithLinearBlock(channels) for i in range(attn_blocks)
+        ])
         previous_dim_mults = [1] + list(dim_mults)
         self.down_blocks = nn.ModuleList([
             DownBlock(previous_dim_mults[i] * channels, dim_mult * channels, time_emb_dim, groups, i != len(dim_mults)-1) for i, dim_mult in enumerate(dim_mults)
         ])
-        self.mid_block = MidBlock(dim_mults[-1] * channels, time_emb_dim, groups)
+        # self.final_conv = nn.Conv2d(dim_mults[-1] * channels, channels * 8, 4, stride=2, padding=1)
         
-        self.fc3 = nn.Linear(4096, self.action_size)
+        self.fc3 = nn.Linear(channels * 8, self.action_size)
 
-        self.fc4 = nn.Linear(4096, 1)
+        self.fc4 = nn.Linear(channels * 8, 1)
         
         
 
@@ -345,17 +347,18 @@ class QuoridorNNet(nn.Module):
         #                                                           s: batch_size*4 x board_x x board_y
         s = s.view(-1, 4, self.board_x, self.board_y)                # batch_size x 4 x board_x x board_y
         x = self.pos_emb(s) + self.initial_conv(s)
-        x = self.attn_block1(x)
-        x = self.attn_block2(x)
         b, d, h, w = x.shape
+        for block in self.attn_blocks:
+            x = block(x)
         time_emb = repeat(self.time_embedding, "x -> b x", b=b)
         # skips = []
         for block in self.down_blocks:
             x, _ = block(x, time_emb)
             # skips += [skip]
-        x = self.mid_block(x, time_emb)
+        # x = self.final_conv(x)
         x = x.squeeze(-1).squeeze(-1)
         pi = self.fc3(x)                                                                         # batch_size x action_size
         v = self.fc4(x)                                                                          # batch_size x 1
         
         return F.log_softmax(pi, dim=1), t.tanh(v)
+        
