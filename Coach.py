@@ -104,7 +104,7 @@ class Coach():
                 trainStats = [0,0,0]
                 for _,_,res in iterationTrainExamples:
                     trainStats[res] += 1
-                print trainStats
+                print(trainStats)
 
             if len(self.trainExamplesHistory) > self.args.numItersForTrainExamplesHistory:
                 print("len(trainExamplesHistory) =", len(self.trainExamplesHistory), " => remove the oldest trainExamples")
