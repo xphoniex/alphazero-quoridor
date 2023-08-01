@@ -110,6 +110,7 @@ int index_of_action(int a, int x, int y) {
 		return (x/2)*selfn_ + (y/2)+1;
 	if (a == 9)
 		return (selfn_*selfn_) + (y+1)/2 + ((x/2)-1)*selfn_;
+  return -1; // add default return 
 }
 
 bitset<128> walls_not_in_path(int x, int y, int *parent) {
@@ -205,7 +206,7 @@ PyObject* bitset_to_pylist(bitset<128> data) {
 	 throw logic_error("Unable to allocate memory for Python list");
 	}
 	for (int i = 0; i < num_walls ; ++i) {
-		PyObject *num = PyInt_FromLong(data[i]);
+		PyObject *num = PyLong_FromLong(data[i]);
 		if (!num) {
 			cout << "ERROR DUO" << endl;
 			Py_DECREF(listObj);
@@ -283,9 +284,30 @@ static PyMethodDef myMethods[] = {
 	{ NULL, NULL, 0, NULL }
 };
 
-PyMODINIT_FUNC initpathFinder(void)
-{
-	PyObject *m = Py_InitModule3("pathFinder", myMethods, "...");
-	if (m == NULL)
-		return;
+// Module definition
+static struct PyModuleDef pathFindermodule = {
+  PyModuleDef_HEAD_INIT,
+  "pathFinder",
+  "Path finding module",
+  -1,
+  myMethods
+};
+
+// Module initialization 
+extern "C" PyObject* PyInit_pathFinder() {
+
+  PyObject* module = PyModule_Create(&pathFindermodule);
+  if (module == NULL) {
+    return NULL;
+  }
+
+  PyObject* err = PyErr_NewException((char*)"pathFinder.Error", NULL, NULL);
+  if (err == NULL) {
+    Py_DECREF(module);
+    return NULL; 
+  }
+
+  PyModule_AddObject(module, "Error", err);
+  
+  return module;
 }
