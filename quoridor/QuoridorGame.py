@@ -122,14 +122,14 @@ def display(board, swap=1):
     pieces = ['1','2']
     if swap:
         pieces = ['2','1']
-    n = (board[0][0].shape[0]/2)+1
+    n = (board[0][0].shape[0]//2)+1
     (x,y) = (x_,y_) = (0,0)
     for i in range(board[0][0].shape[0]):
         for j in range(board[0][0].shape[0]):
             if board[0][i][j]==1:
-                (x,y) = (i/2,j+1)
+                (x,y) = (i//2,j+1)
             if board[1][i][j]==1:
-                (x_,y_) = (i/2,j+1)
+                (x_,y_) = (i//2,j+1)
 
     blocks = board[2]+board[3]
     extraH = []
@@ -153,6 +153,6 @@ def display(board, swap=1):
             blocks_row = row*2 + 1
             for col in range(n*2-1):
                 if blocks[blocks_row][col] and col+2 < n*2-1 and blocks[blocks_row][col+2]:
-                    rH = placeHorizontalWall(rH, (col+1)/2, 'x')
+                    rH = placeHorizontalWall(rH, (col+1)//2, 'x')
         print (rV)
         print (rH)

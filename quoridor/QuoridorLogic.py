@@ -17,8 +17,8 @@ class Board():
         # Create the empty board array.
         self.pieces = np.zeros((4, self.n, self.n), dtype='uint8')
 
-        self.pieces[0][self.n-1][self.n/2] = 1
-        self.pieces[1][0][self.n/2] = 1
+        self.pieces[0][self.n-1][self.n//2] = 1
+        self.pieces[1][0][self.n//2] = 1
         pathFinder.setup(n)
 
     def get_legal_moves(self, color, pool=None):
@@ -102,7 +102,7 @@ class Board():
     def player_position(self, color):
         idx = 0 if color==1 else 1
         pos = np.argmax(self.pieces[idx])
-        return (pos/self.n, pos%self.n)
+        return (pos//self.n, pos%self.n)
 
     def wall_moves_(self, color):
         idx = 2 if color==1 else 3
@@ -235,14 +235,14 @@ class Board():
             tail = head
             # vertical move only blocked by horizontal walls
             if y == y_:
-                ax, ay = (x+x_)/2, y
+                ax, ay = (x+x_)//2, y
                 if ay<self.n -1:
                     valids[self.index_of_action(8, ax, ay)-8] = 0
                 if ay-2>=0:
                     valids[self.index_of_action(8, ax, ay-2)-8] = 0
             # horizontal move only blocked by vertical walls
             if x == x_:
-                ay, ax = (y+y_)/2, x
+                ay, ax = (y+y_)//2, x
                 if ax>=2:
                     valids[self.index_of_action(9, ax, ay)-8] = 0
                 if ax+2<=self.n-1:
@@ -254,6 +254,9 @@ class Board():
         a, (x,y) = self.action_from_index(move, color)
         # moving
         idx = 0 if color==1 else 1
+        x = int(x)
+        y = int(y)
+        idx = int(idx)
         if (a<8):
             self.pieces[idx].fill(0)
             self.pieces[idx][x][y]=1
@@ -270,19 +273,19 @@ class Board():
     def index_of_action(self, a, x, y):
         if (a<8): return a                                          # 0 - 7
         if (a==8):
-            return 7 + (x/2)*self.n_ + (y/2)+1                      # 8 - 71
+            return 7 + (x//2)*self.n_ + (y//2)+1                      # 8 - 71
         if (a==9):
-            return 7 + (self.n_**2) + (y+1)/2 + ((x/2)-1)*self.n_   # 72 - 135
+            return 7 + (self.n_**2) + (y+1)//2 + ((x//2)-1)*self.n_   # 72 - 135
 
     def action_from_index(self, index, color):
         if (index<8):
             return self.move_action_destination(index, color)
         if (7 < index < 8+(self.n_**2)):
             c = index - 8
-            return [8, [(c / self.n_)*2 + 1, (c % self.n_)*2]]
+            return [8, [(c // self.n_)*2 + 1, int(c % self.n_)*2]]
         if (7+(self.n_**2) < index < 8+2*(self.n_**2)):
             c = index - 8 - (self.n_**2)
-            return [9, [(c / self.n_)*2 + 2, (c % self.n_)*2 + 1]]
+            return [9, [(c // self.n_)*2 + 2, int(c % self.n_)*2 + 1]]
 
     def move_action_destination(self, action, color):
 
@@ -337,7 +340,7 @@ class Board():
 
         print ('\nnothing found')
         print (action,color)
-        print self.pieces[0]
-        print self.pieces[1]
-        print self.pieces[2]
-        print self.pieces[3]
+        print(self.pieces[0])
+        print(self.pieces[1])
+        print(self.pieces[2])
+        print(self.pieces[3])
